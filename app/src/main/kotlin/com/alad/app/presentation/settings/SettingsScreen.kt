@@ -1,3 +1,4 @@
+
 package com.alad.app.presentation.settings
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -38,6 +39,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit = {}) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    val clipboardManager = LocalClipboardManager.current
     val apiKey by viewModel.userApiKey.collectAsState()
     val selectedVoice by viewModel.voicePersona.collectAsState()
     val selectedMode by viewModel.dubbingMode.collectAsState()
@@ -159,6 +161,42 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit = {}) {
                                 }
                             }
                         )
+                                                Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedButton(
+                            onClick = {
+                                val pastedText = clipboardManager.getText()?.text?.trim()
+                                if (!pastedText.isNullOrEmpty()) {
+                                    viewModel.updateApiKey(pastedText)
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("API Key pasted from clipboard")
+                                    }
+                                } else {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Clipboard is empty")
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f)),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = NeonCyan.copy(alpha = 0.1f),
+                                contentColor = NeonCyan
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentPaste,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Paste API Key from Clipboard",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
